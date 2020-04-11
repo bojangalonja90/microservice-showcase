@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/applicationa/applicationa.iml" filepath="$PROJECT_DIR$/applicationa/applicationa.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applicationb/applicationb.iml" filepath="$PROJECT_DIR$/applicationb/applicationb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gateway/gateway.iml" filepath="$PROJECT_DIR$/gateway/gateway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/microservice-showcase.iml" filepath="$PROJECT_DIR$/.idea/microservice-showcase.iml" />
+    </modules>
+  </component>
+</project>

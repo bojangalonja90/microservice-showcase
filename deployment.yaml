@@ -1,0 +1,262 @@
+#deployments
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: applicationa
+  name: applicationa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: applicationa
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: applicationa
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: /actuator/prometheus
+    spec:
+      containers:
+      - image: appa:v10
+        name: appa
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: "k8s"
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: pwd-secret
+                key: password
+        resources: {}
+status: {}
+---
+#deployments
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: applicationb
+  name: applicationb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: applicationb
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: applicationb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8082"
+        prometheus.io/path: /actuator/prometheus
+    spec:
+      containers:
+        - image: appb:v10
+          name: appb
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+          resources: {}
+status: {}
+
+---
+#deployments
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: zipkin
+  name: zipkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zipkin
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: zipkin
+    spec:
+      containers:
+        - image: openzipkin/zipkin
+          name: zipkin
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: STORAGE_TYPE
+              value: "mem"
+          resources: {}
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: gateway
+  name: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - image: gateway:v10
+          name: gateway
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+          resources: {}
+status: {}
+
+#configurations
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: applicationa
+data:
+  application.yml: |-
+    spring:
+      profiles: k8s
+      cloud.kubernetes.reload.enabled: true
+      zipkin.baseUrl: http://zipkin:9411/
+    app:
+      username: user1-k8s
+      password: ${PASSWORD}
+      applicationaUrl: "http://applicationb:8082"
+      message: "a message that can be changed live k8s"
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: applicationb
+data:
+  application.yml: |-
+    spring:
+      profiles: k8s
+      cloud.kubernetes.reload.enabled: true
+      zipkin.baseUrl: http://zipkin:9411/
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gateway
+data:
+  application.yml: |-
+    spring:
+      profiles: k8s
+      zipkin.baseUrl: http://zipkin:9411/
+    gateway:
+      applicationAUrl: "http://applicationa:8081"
+      applicationBUrl: "http://applicationb:8082"
+
+#services exposure
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: applicationa
+  name: applicationa
+spec:
+  ports:
+  - name: application
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    app: applicationa
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: applicationb
+  name: applicationb
+spec:
+  ports:
+    - name: application
+      port: 8082
+      protocol: TCP
+      targetPort: 8082
+  selector:
+    app: applicationb
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: zipkin
+  name: zipkin
+spec:
+  ports:
+    - name: zipkin
+      port: 9411
+      protocol: TCP
+      targetPort: 9411
+  selector:
+    app: zipkin
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: gateway
+  name: gateway
+spec:
+  ports:
+    - name: gateway
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: gateway
+  type: NodePort
+status:
+  loadBalancer: {}

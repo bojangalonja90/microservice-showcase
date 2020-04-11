@@ -1,0 +1,7 @@
+management.endpoint.gateway.enabled: true # default value
+management.endpoints.web.exposure.include: gateway
+
+#endpoints
+gateway:
+  applicationAUrl: "http://localhost:8081"
+  applicationBUrl: "http://localhost:8082"

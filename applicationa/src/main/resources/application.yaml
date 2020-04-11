@@ -1,0 +1,13 @@
+server.port: 8081
+
+management.security.enabled: false
+logging.level.org.springframework.web: INFO
+management.endpoints.web.exposure.include: "*"
+
+#app properties
+app:
+  username: user1
+  password: much-secret
+  applicationaUrl: "http://localhost:8082"
+  message: "a message that can be changed live dev"
+
