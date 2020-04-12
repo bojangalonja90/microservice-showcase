@@ -12,6 +12,7 @@
         <module>applicationa</module>
         <module>applicationb</module>
         <module>gateway</module>
+        <module>book-api</module>
     </modules>
 
 </project>
