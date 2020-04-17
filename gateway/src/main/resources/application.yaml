@@ -1,7 +1,27 @@
 management.endpoint.gateway.enabled: true # default value
-management.endpoints.web.exposure.include: gateway
+management.endpoints.web.exposure.include: "*"
+server.port: 8080
 
 #endpoints
 gateway:
-  applicationAUrl: "http://localhost:8081"
   applicationBUrl: "http://localhost:8082"
+  volumesApiUrl: "http://localhost:8081"
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: setstatus_route
+          predicates:
+            - Path=/employee/**
+          uri: http://example.org
+          filters:
+            - name: SetStatus
+              args:
+                status: 401
+        - id: setstatusshortcut_route
+          predicates:
+            - Path=/employee/**
+          uri: http://example.org
+          filters:
+            - SetStatus=401

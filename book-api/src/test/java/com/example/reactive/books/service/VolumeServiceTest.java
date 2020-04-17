@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class VolumeServiceTest {
@@ -86,21 +88,31 @@ public class VolumeServiceTest {
     @Test
     public void testUpdate_success() {
         String id = "1";
-        String name = "nameUpdated";
+        String nameUpdated = "nameUpdated";
+        List<String> updatedAuthors = List.of("author updated");
 
         Mockito.when(this.volumeRepository.findById(id))//
                 .thenReturn(Mono.just(mockedVolumes.get(0)));
 
-        Volume newVolumeMocked = new Volume(id, name, new ArrayList<>());
+        ArgumentCaptor<Volume> volumeCaptor = ArgumentCaptor.forClass(Volume.class);
+
+        Volume newVolumeMocked = new Volume(id, nameUpdated, updatedAuthors);
         Mockito.when(this.volumeRepository.save(Mockito.any(Volume.class)))//
                 .thenReturn(Mono.just(newVolumeMocked));
-        Mono<Volume> created = volumeService.update(id, new Volume(id, name, new ArrayList<>()))//
+        Mono<Volume> created = volumeService.update(id, new Volume(id, nameUpdated, updatedAuthors))//
                 .flatMap(v -> Mono.just(v));
+
 
         StepVerifier.create(created)
                 .expectNextMatches(volume -> id.equals(volume.getId()))
                 .verifyComplete();
 
+        Mockito.verify(volumeRepository).save(volumeCaptor.capture());
+
+        Volume volumeCaptured = volumeCaptor.getValue();
+        assertEquals(volumeCaptured.getId(), id);
+        assertEquals(volumeCaptured.getTitle(), nameUpdated);
+        assertEquals(volumeCaptured.getAuthors().get(0), updatedAuthors.get(0));
     }
 
     @Test

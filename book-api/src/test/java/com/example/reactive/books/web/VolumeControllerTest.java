@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,31 @@ public class VolumeControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk();
+
+    }
+
+    @Test
+    public void update() {
+
+        Volume updatedVolume = new Volume("123",  "updatedTitle", List.of("first updated author"));
+
+        Mockito.when(this.volumeService.findById(Mockito.anyString()))//
+                .thenReturn(Mono.just(mockedVolumes.get(0)));
+
+        Mockito.when(this.volumeService.update(Mockito.anyString(),Mockito.any(Volume.class)))//
+                .thenReturn(Mono.just(updatedVolume));
+
+        this.client//
+                .put()
+                .uri(BASE_URL + "/123").body(Mono.just(mockedVolumes.get(0)), Volume.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id").isNotEmpty()
+                .jsonPath("$.title").isEqualTo("updatedTitle")
+                .jsonPath("$.authors[*]").isEqualTo("first updated author");
 
     }
 

@@ -43,7 +43,7 @@ public class VolumeService {
         return volumeRepository.findById(id)//
                 //TODO error handling with status code
                 .switchIfEmpty(Mono.error(new BadRequestException(String.format("The volume with id: %s not found", id))))
-                .map(p -> new Volume())
+                .map(v -> new Volume(v.getId(), volume.getTitle(), volume.getAuthors()))
                 .flatMap(this.volumeRepository::save);
     }
 }

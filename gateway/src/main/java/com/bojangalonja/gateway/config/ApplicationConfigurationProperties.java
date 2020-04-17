@@ -7,17 +7,10 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "gateway")
 public class ApplicationConfigurationProperties {
 
-    private String applicationAUrl;
+
+    private String volumesApiUrl;
 
     private String applicationBUrl;
-
-    public String getApplicationAUrl() {
-        return applicationAUrl;
-    }
-
-    public void setApplicationAUrl(String applicationAUrl) {
-        this.applicationAUrl = applicationAUrl;
-    }
 
     public String getApplicationBUrl() {
         return applicationBUrl;
@@ -25,5 +18,13 @@ public class ApplicationConfigurationProperties {
 
     public void setApplicationBUrl(String applicationBUrl) {
         this.applicationBUrl = applicationBUrl;
+    }
+
+    public String getVolumesApiUrl() {
+        return volumesApiUrl;
+    }
+
+    public void setVolumesApiUrl(String volumesApiUrl) {
+        this.volumesApiUrl = volumesApiUrl;
     }
 }
