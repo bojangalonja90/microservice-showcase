@@ -1,8 +1,0 @@
-management.endpoint.gateway.enabled: true # default value
-management.endpoints.web.exposure.include: "*"
-server.port: 8080
-
-#endpoints
-gateway:
-  bookshelvesApiUrl: "http://localhost:8082"
-  volumesApiUrl: "http://localhost:8081"
