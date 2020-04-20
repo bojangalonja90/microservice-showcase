@@ -4,24 +4,5 @@ server.port: 8080
 
 #endpoints
 gateway:
-  applicationBUrl: "http://localhost:8082"
+  bookshelvesApiUrl: "http://localhost:8082"
   volumesApiUrl: "http://localhost:8081"
-
-spring:
-  cloud:
-    gateway:
-      routes:
-        - id: setstatus_route
-          predicates:
-            - Path=/employee/**
-          uri: http://example.org
-          filters:
-            - name: SetStatus
-              args:
-                status: 401
-        - id: setstatusshortcut_route
-          predicates:
-            - Path=/employee/**
-          uri: http://example.org
-          filters:
-            - SetStatus=401

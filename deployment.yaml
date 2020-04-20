@@ -45,19 +45,19 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: applicationb
-  name: applicationb
+    app: bookshelves
+  name: bookshelves
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: applicationb
+      app: bookshelves
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: applicationb
+        app: bookshelves
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8082"
@@ -159,7 +159,7 @@ data:
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: applicationb
+  name: bookshelves
 data:
   application.yml: |-
     spring:
@@ -208,8 +208,8 @@ kind: Service
 metadata:
   creationTimestamp: null
   labels:
-    app: applicationb
-  name: applicationb
+    app: bookshelves
+  name: bookshelves
 spec:
   ports:
     - name: application
@@ -217,7 +217,7 @@ spec:
       protocol: TCP
       targetPort: 8082
   selector:
-    app: applicationb
+    app: bookshelves
   type: ClusterIP
 status:
   loadBalancer: {}

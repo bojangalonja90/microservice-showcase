@@ -1,7 +1,6 @@
 package com.example.reactive.books.service;
 
 import com.example.reactive.books.exceptions.BadRequestException;
-import com.example.reactive.books.exceptions.NoDataFoundException;
 import com.example.reactive.books.model.Volume;
 import com.example.reactive.books.repository.VolumeRepository;
 import org.springframework.stereotype.Service;
@@ -41,7 +40,6 @@ public class VolumeService {
     public Mono<Volume> update(String id, Volume volume) {
 
         return volumeRepository.findById(id)//
-                //TODO error handling with status code
                 .switchIfEmpty(Mono.error(new BadRequestException(String.format("The volume with id: %s not found", id))))
                 .map(v -> new Volume(v.getId(), volume.getTitle(), volume.getAuthors()))
                 .flatMap(this.volumeRepository::save);

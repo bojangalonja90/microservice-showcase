@@ -10,14 +10,14 @@ public class ApplicationConfigurationProperties {
 
     private String volumesApiUrl;
 
-    private String applicationBUrl;
+    private String bookshelvesApiUrl;
 
-    public String getApplicationBUrl() {
-        return applicationBUrl;
+    public String getBookshelvesApiUrl() {
+        return bookshelvesApiUrl;
     }
 
-    public void setApplicationBUrl(String applicationBUrl) {
-        this.applicationBUrl = applicationBUrl;
+    public void setBookshelvesApiUrl(String bookshelvesApiUrl) {
+        this.bookshelvesApiUrl = bookshelvesApiUrl;
     }
 
     public String getVolumesApiUrl() {

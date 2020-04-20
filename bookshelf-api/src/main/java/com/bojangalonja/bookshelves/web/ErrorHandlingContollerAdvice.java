@@ -1,7 +1,7 @@
-package com.example.reactive.books.web;
+package com.bojangalonja.bookshelves.web;
 
-import com.example.reactive.books.exceptions.BadRequestException;
-import com.example.reactive.books.model.ErrorResponse;
+import com.bojangalonja.bookshelves.exceptions.BadRequestException;
+import com.bojangalonja.bookshelves.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import reactor.core.publisher.Mono;
 
 @ControllerAdvice
-public class ContollerAdvajs {
+public class ErrorHandlingContollerAdvice {
 
     @ExceptionHandler(value = BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

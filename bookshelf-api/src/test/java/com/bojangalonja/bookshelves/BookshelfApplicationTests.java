@@ -1,10 +1,10 @@
-package com.bojangalonja.applicationb;
+package com.bojangalonja.bookshelves;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApplicationbApplicationTests {
+class BookshelfApplicationTests {
 
 	@Test
 	void contextLoads() {
