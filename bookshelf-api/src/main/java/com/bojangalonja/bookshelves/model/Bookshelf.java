@@ -3,6 +3,7 @@ package com.bojangalonja.bookshelves.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class Bookshelf {
 
     private String description;
 
-    private List<String> items;
+    private List<String> items = new ArrayList<>();
 
     private Date created;
 

@@ -34,7 +34,9 @@ public class VolumeController {
     }
 
     @GetMapping("/{id}")
-    public Mono<Volume> findOne(@PathVariable String id) { return this.volumeService.findById(id); }
+    public Mono<Volume> findOne(@PathVariable String id) {
+        return this.volumeService.findById(id);
+    }
 
     @PostMapping()
     public Mono<Volume> create(@RequestBody Volume volume) {

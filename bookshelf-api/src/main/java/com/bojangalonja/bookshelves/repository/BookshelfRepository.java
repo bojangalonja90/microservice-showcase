@@ -12,6 +12,6 @@ public interface BookshelfRepository extends ReactiveMongoRepository<Bookshelf, 
 
     Mono<Bookshelf> findByUserIdAndId(String userId, String id);
 
-    void deleteByUserIdAndId(String userId, String id);
+    Mono<Void> deleteByUserIdAndId(String userId, String id);
 
 }

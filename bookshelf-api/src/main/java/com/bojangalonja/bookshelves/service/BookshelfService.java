@@ -1,5 +1,6 @@
 package com.bojangalonja.bookshelves.service;
 
+import com.bojangalonja.bookshelves.client.VolumesApiClient;
 import com.bojangalonja.bookshelves.exceptions.BadRequestException;
 import com.bojangalonja.bookshelves.mapper.BookshelfMapper;
 import com.bojangalonja.bookshelves.model.Bookshelf;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,13 +20,13 @@ public class BookshelfService {
 
     private final BookshelfRepository bookshelfRepository;
 
-    List<Bookshelf> bookshelves = List.of(new Bookshelf("1", "1", "To read", "List of books to read", //
-            List.of("123"), new Date(), new Date(), 1));
+    private final VolumesApiClient volumesApiClient;
 
 
-    public BookshelfService(BookshelfMapper bookshelfMapper, BookshelfRepository bookshelfRepository){
+    public BookshelfService(BookshelfMapper bookshelfMapper, BookshelfRepository bookshelfRepository, VolumesApiClient volumesApiClient){
         this.bookshelfMapper = bookshelfMapper;
         this.bookshelfRepository = bookshelfRepository;
+        this.volumesApiClient = volumesApiClient;
     }
 
     public Flux<BookshelfDTO> findAll(String userId) {
@@ -41,39 +41,92 @@ public class BookshelfService {
     }
 
     public Mono<BookshelfDTO> create(String userId, BookshelfDTO bookshelfDTO) {
-        //TODO validate user
 
-        //TODO validate books
-
-        bookshelfDTO.setUserId(userId);
-        Bookshelf bookshelf = bookshelfMapper.bookshelfDtoToBookshelf(bookshelfDTO);
-
-        return bookshelfRepository.save(bookshelf).flatMap(b -> Mono.just(bookshelfMapper.bookshelfToBookshelfDto(b)));
+        return getValidVolumeIds(bookshelfDTO.getItems()).zipWhen(validIds -> {
+            bookshelfDTO.setItems(validIds);
+            //userExists(bookshelfDTO.getUserId());
+            bookshelfDTO.setUserId(userId);
+            return Mono.just(bookshelfDTO);
+        }).flatMap(tuple -> {
+            Bookshelf bookshelf = bookshelfMapper.bookshelfDtoToBookshelf(bookshelfDTO);
+            return bookshelfRepository.save(bookshelf);
+        }).flatMap(b -> Mono.just(bookshelfMapper.bookshelfToBookshelfDto(b)));
 
     }
 
 
     public Mono<BookshelfDTO> update(String userId, String id, BookshelfDTO bookshelfDTO) {
-        return findOne(userId, id).switchIfEmpty(Mono.error(
+        return bookshelfRepository.findByUserIdAndId(userId, id).switchIfEmpty(Mono.error(
                 new BadRequestException(String.format("The bookshelf with id: %s and user: %s not found ", id, userId))))
-                .map(b -> {
-
-                    Bookshelf bookshelfMapped = bookshelfMapper.bookshelfDtoToBookshelf(b);
-                    bookshelfMapped.setId(b.getId());
-                    bookshelfMapped.setUserId(b.getUserId());
-                    return bookshelfMapped;
-
+                .zipWhen(foundBookshelf -> {
+                    return prepareBookshelfToPersist(foundBookshelf, bookshelfDTO);
                 })
-                .flatMap(bookshelf -> bookshelfRepository.save(bookshelf))
+                .zipWhen(tuple2 -> {
+                    return getValidVolumeIds(bookshelfDTO.getItems());
+                })
+                .flatMap(tupl -> {
+                    Bookshelf bookshelfToSave = tupl.getT1().getT2();
+                    List<String> validBookIds = tupl.getT2();
+                    bookshelfToSave.setItems(validBookIds);
+
+                    return bookshelfRepository.save(bookshelfToSave);
+                })
                 .flatMap(bookshelfSaved -> Mono.just(bookshelfMapper.bookshelfToBookshelfDto(bookshelfSaved)));
 
-        //TODO log errors as they happen
     }
 
-    public void delete(String userId, String id) {
-        bookshelfRepository.findByUserIdAndId(userId, id).switchIfEmpty(Mono.error(
-                new BadRequestException(String.format("The bookshelf with id: %s and user: %s not found ", id, userId))));
-        bookshelfRepository.deleteByUserIdAndId(userId, id);
+    private Mono<Bookshelf> prepareBookshelfToPersist(Bookshelf original, BookshelfDTO toUpdate){
+
+        Bookshelf bookshelfMapped = bookshelfMapper.bookshelfDtoToBookshelf(toUpdate);
+        bookshelfMapped.setId(original.getId());
+        bookshelfMapped.setUserId(original.getUserId());
+
+        return Mono.just(bookshelfMapped);
+
     }
 
+    public Mono<Void> delete(String userId, String id) {
+        return bookshelfRepository.findByUserIdAndId(userId, id).switchIfEmpty(Mono.error(
+                    new BadRequestException(String.format("The bookshelf with id: %s and user: %s not found ", id, userId)))
+                )
+                .flatMap(m -> {
+                    return this.bookshelfRepository.deleteByUserIdAndId(userId, id);
+                });
+
+    }
+
+    private Mono<User> userExists(String userId) {
+        //Dummy user validation implementation
+        if(!"1".equals(userId)){
+            return Mono.error(new BadRequestException(String.format("The user with id does not exist: %s", userId)));
+        }
+
+        return Mono.just(new User("1"));
+    }
+
+    private Mono<List<String>> getValidVolumeIds(List<String> idsToCheck) {
+        return Flux.fromIterable(idsToCheck)
+                .flatMap(id -> volumesApiClient.getVolume(id))
+                .flatMap(volume -> Mono.just(volume.getId()))
+                .collectList();
+
+    }
+
+
+}
+
+class User{
+    private String id;
+
+    public User(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

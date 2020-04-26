@@ -2,3 +2,6 @@ server.port: 8082
 
 management.security.enabled: false
 management.endpoints.web.exposure.include: "*"
+
+
+app.volumesApiUrl: "http://localhost:8081/api/v1/"

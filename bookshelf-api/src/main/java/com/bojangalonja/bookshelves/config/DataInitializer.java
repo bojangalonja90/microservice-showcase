@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,9 +29,9 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
 
         List<Bookshelf> bookshelves = List.of(
                 new Bookshelf("1", "1", "To read", //
-                        "Books to read", List.of("123", "234"), new Date(), new Date(), 2),
+                        "Books to read", new ArrayList<>(), new Date(), new Date(), 0),
                 new Bookshelf("2", "2", "To read", //
-                        "Books to read", List.of("123", "234"), new Date(), new Date(), 2)
+                        "Books to read", new ArrayList<>(), new Date(), new Date(), 0)
         );
 
         bookshelfRepository.deleteAll().thenMany(Flux.fromIterable(bookshelves))

@@ -1,5 +1,6 @@
 package com.bojangalonja.bookshelves.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class BookshelfDTO {
 
     private String description;
 
-    private List<String> items;
+    private List<String> items = new ArrayList<>();
 
     private Date created;
 
